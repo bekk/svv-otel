@@ -1,0 +1,58 @@
+services:
+  tempo:
+    image: grafana/tempo:2.0.0
+    ports:
+      - "3200:3200"
+      - "4317:4317"
+    volumes:
+      - ./tempo.yaml:/etc/tempo.yaml
+      - ./tempo-data:/var/tempo/traces
+      - ./tempo-config:/etc/tempo
+    environment:
+      - TEMPORAL_STORAGE_PATH=/var/tempo/traces
+    command: "-config.file=/etc/tempo.yaml"
+
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yaml:/etc/prometheus.yaml
+      - ./prometheus-data:/prometheus
+    command:
+      - "--config.file=/etc/prometheus.yaml"
+      - "--web.enable-remote-write-receiver"
+    depends_on:
+      - kundereg
+      - foererkort
+      - tempo
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_FEATURE_TOGGLES_ENABLE=traceqlEditor traceQLStreaming metricsSummary
+    depends_on:
+      - tempo
+      - prometheus
+
+  foererkort:
+    build: ./foererkort
+    environment:
+      OTEL_SERVICE_NAME: "foererkort"
+      HOSTNAME: "foererkort"
+    ports:
+      - "8081:8080"
+    depends_on:
+      - tempo
+
+  kundereg:
+    build: ./kundereg
+    environment:
+      OTEL_SERVICE_NAME: "kundereg"
+      HOSTNAME: "kundereg"
+    ports:
+      - "8080:8080"
+    depends_on:
+      - tempo
