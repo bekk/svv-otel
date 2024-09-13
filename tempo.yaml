@@ -8,11 +8,6 @@ storage:
       path: /var/tempo/traces
 
 metrics_generator:
-#  registry:
-#    collection_interval: 5s
-#    external_labels:
-#      source: tempo
-#      cluster: docker-compose
   storage:
     path: /tmp/tempo/wal
     remote_write:
