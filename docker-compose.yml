@@ -6,8 +6,6 @@ services:
       - "4317:4317"
     volumes:
       - ./tempo.yaml:/etc/tempo.yaml
-      - ./tempo-data:/var/tempo/traces
-      - ./tempo-config:/etc/tempo
     environment:
       - TEMPORAL_STORAGE_PATH=/var/tempo/traces
     command: "-config.file=/etc/tempo.yaml"
@@ -18,7 +16,6 @@ services:
       - "9090:9090"
     volumes:
       - ./prometheus.yaml:/etc/prometheus.yaml
-      - ./prometheus-data:/prometheus
     command:
       - "--config.file=/etc/prometheus.yaml"
       - "--web.enable-remote-write-receiver"
@@ -59,8 +56,8 @@ services:
 
   traffic:
     build: ./traffic
-    environment:
-      OTEL_SERVICE_NAME: "traffic_service"
-      HOSTNAME: "traffic"
     ports:
       - "5000:5000"
+    depends_on:
+      - foererkort
+      - kundereg
