@@ -56,3 +56,11 @@ services:
       - "8080:8080"
     depends_on:
       - tempo
+
+  traffic:
+    build: ./traffic
+    environment:
+      OTEL_SERVICE_NAME: "traffic_service"
+      HOSTNAME: "traffic"
+    ports:
+      - "5000:5000"
